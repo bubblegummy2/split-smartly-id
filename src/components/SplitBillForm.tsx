@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
-
+import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { formatRupiah, parseRupiah } from "@/lib/currency";
 import { Plus, Trash2, Calculator, Users, Camera } from "lucide-react";
@@ -28,6 +28,15 @@ interface Participant {
   name: string;
 }
 
+const CATEGORIES = [
+  "Makanan",
+  "Minuman",
+  "Transportasi",
+  "Akomodasi",
+  "Hiburan",
+  "Lainnya",
+];
+
 export default function SplitBillForm({ userId }: { userId: string }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -43,7 +52,7 @@ export default function SplitBillForm({ userId }: { userId: string }) {
   const [newItemName, setNewItemName] = useState("");
   const [newItemPrice, setNewItemPrice] = useState("");
   const [newItemQuantity, setNewItemQuantity] = useState("1");
-  const [selectedOwner, setSelectedOwner] = useState("");
+  const [newItemCategory, setNewItemCategory] = useState("Makanan");
 
   // New participant
   const [newParticipantName, setNewParticipantName] = useState("");
@@ -57,25 +66,20 @@ export default function SplitBillForm({ userId }: { userId: string }) {
       alert("Harga harus lebih dari 0!");
       return;
     }
-    if (!selectedOwner) {
-      alert("Pilih pemilik item!");
-      return;
-    }
 
     const newItem: Item = {
       id: Date.now().toString(),
       name: newItemName,
       price: parseRupiah(newItemPrice),
       quantity: parseInt(newItemQuantity) || 1,
-      category: "Lainnya", // Default category
-      assignedTo: [selectedOwner],
+      category: newItemCategory,
+      assignedTo: [],
     };
 
     setItems([...items, newItem]);
     setNewItemName("");
     setNewItemPrice("");
     setNewItemQuantity("1");
-    setSelectedOwner("");
     toast.success("Item ditambahkan");
   };
 
@@ -118,6 +122,20 @@ export default function SplitBillForm({ userId }: { userId: string }) {
     toast.success("Peserta dihapus");
   };
 
+  const toggleAssignment = (itemId: string, participantId: string) => {
+    setItems(items.map((item) => {
+      if (item.id === itemId) {
+        const isAssigned = item.assignedTo.includes(participantId);
+        return {
+          ...item,
+          assignedTo: isAssigned
+            ? item.assignedTo.filter((id) => id !== participantId)
+            : [...item.assignedTo, participantId],
+        };
+      }
+      return item;
+    }));
+  };
 
   const calculateSplit = () => {
     const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -363,28 +381,22 @@ export default function SplitBillForm({ userId }: { userId: string }) {
                   />
                 </div>
                 <div>
-                  <Label>Nama Pemilik *</Label>
-                  <Select value={selectedOwner} onValueChange={setSelectedOwner}>
-                    <SelectTrigger className="bg-popover">
-                      <SelectValue placeholder="Pilih pemilik" />
+                  <Label>Kategori</Label>
+                  <Select value={newItemCategory} onValueChange={setNewItemCategory}>
+                    <SelectTrigger>
+                      <SelectValue />
                     </SelectTrigger>
-                    <SelectContent className="bg-popover z-50">
-                      {participants.length === 0 ? (
-                        <div className="px-2 py-6 text-center text-sm text-muted-foreground">
-                          Tambahkan peserta terlebih dahulu
-                        </div>
-                      ) : (
-                        participants.map((participant) => (
-                          <SelectItem key={participant.id} value={participant.id}>
-                            {participant.name}
-                          </SelectItem>
-                        ))
-                      )}
+                    <SelectContent>
+                      {CATEGORIES.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
-              <Button onClick={addItem} className="w-full" disabled={participants.length === 0}>
+              <Button onClick={addItem} className="w-full">
                 <Plus className="mr-2 h-4 w-4" />
                 Tambah Item
               </Button>
@@ -394,34 +406,29 @@ export default function SplitBillForm({ userId }: { userId: string }) {
               <>
                 <Separator />
                 <div className="space-y-2">
-                  {items.map((item) => {
-                    const ownerName = participants.find(p => p.id === item.assignedTo[0])?.name || "Unknown";
-                    return (
-                      <div
-                        key={item.id}
-                        className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors"
-                      >
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2">
-                            <span className="font-medium">{item.name}</span>
-                            <Badge variant="secondary" className="text-xs">
-                              {ownerName}
-                            </Badge>
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {formatRupiah(item.price)} × {item.quantity} = {formatRupiah(item.price * item.quantity)}
-                          </div>
+                  {items.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/5 transition-colors"
+                    >
+                      <div className="flex-1">
+                        <div className="font-medium">{item.name}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {formatRupiah(item.price)} × {item.quantity} = {formatRupiah(item.price * item.quantity)}
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeItem(item.id)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <Badge variant="outline" className="mt-1">
+                          {item.category}
+                        </Badge>
                       </div>
-                    );
-                  })}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeItem(item.id)}
+                      >
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                      </Button>
+                    </div>
+                  ))}
                 </div>
               </>
             )}
@@ -511,6 +518,42 @@ export default function SplitBillForm({ userId }: { userId: string }) {
           </CardContent>
         </Card>
 
+        {/* Item Assignment */}
+        {items.length > 0 && participants.length > 0 && (
+          <Card className="shadow-medium">
+            <CardHeader>
+              <CardTitle>Assign Item ke Peserta</CardTitle>
+              <CardDescription>Centang item yang dipesan masing-masing orang</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {items.map((item) => (
+                <div key={item.id} className="space-y-2">
+                  <div className="font-medium text-sm">
+                    {item.name} ({formatRupiah(item.price * item.quantity)})
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {participants.map((participant) => (
+                      <div key={participant.id} className="flex items-center space-x-2">
+                        <Checkbox
+                          id={`${item.id}-${participant.id}`}
+                          checked={item.assignedTo.includes(participant.id)}
+                          onCheckedChange={() => toggleAssignment(item.id, participant.id)}
+                        />
+                        <Label
+                          htmlFor={`${item.id}-${participant.id}`}
+                          className="text-sm cursor-pointer"
+                        >
+                          {participant.name}
+                        </Label>
+                      </div>
+                    ))}
+                  </div>
+                  <Separator className="mt-2" />
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Summary */}
         {participants.length > 0 && (
