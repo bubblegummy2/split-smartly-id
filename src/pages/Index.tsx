@@ -1,12 +1,111 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Receipt, Users, Calculator, Camera } from "lucide-react";
+import heroImage from "@/assets/hero-split-bill.jpg";
 
 const Index = () => {
+  const navigate = useNavigate();
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-gradient-subtle">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-primary opacity-90" />
+        <img 
+          src={heroImage} 
+          alt="Split bills with friends" 
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="relative container mx-auto px-4 py-24 text-center text-white">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6">
+            Split Bill
+          </h1>
+          <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-2xl mx-auto">
+            Bagi tagihan dengan mudah dan adil menggunakan AI
+          </p>
+          <Button 
+            size="lg" 
+            onClick={() => navigate("/auth")}
+            className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-glow text-lg px-8 py-6"
+          >
+            Mulai Sekarang
+          </Button>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section className="container mx-auto px-4 py-20">
+        <h2 className="text-3xl font-bold text-center mb-12">Fitur Unggulan</h2>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <Card className="shadow-medium hover:shadow-large transition-shadow">
+            <CardContent className="pt-6 text-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Camera className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold mb-2">Scan Struk AI</h3>
+              <p className="text-sm text-muted-foreground">
+                Upload foto struk dan AI akan otomatis mendeteksi item & harga
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-medium hover:shadow-large transition-shadow">
+            <CardContent className="pt-6 text-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold mb-2">Multi Peserta</h3>
+              <p className="text-sm text-muted-foreground">
+                Tambah 2-10 orang dan assign item ke masing-masing peserta
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-medium hover:shadow-large transition-shadow">
+            <CardContent className="pt-6 text-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Calculator className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold mb-2">Perhitungan Otomatis</h3>
+              <p className="text-sm text-muted-foreground">
+                Sistem otomatis menghitung pembagian dengan biaya tambahan
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card className="shadow-medium hover:shadow-large transition-shadow">
+            <CardContent className="pt-6 text-center">
+              <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Receipt className="h-6 w-6 text-primary" />
+              </div>
+              <h3 className="font-semibold mb-2">Riwayat Transaksi</h3>
+              <p className="text-sm text-muted-foreground">
+                Semua transaksi tersimpan untuk referensi di masa depan
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="container mx-auto px-4 py-20 text-center">
+        <Card className="max-w-2xl mx-auto shadow-large border-primary/20">
+          <CardContent className="pt-12 pb-12">
+            <h2 className="text-3xl font-bold mb-4">Siap Mulai Membagi Tagihan?</h2>
+            <p className="text-muted-foreground mb-8">
+              Login dengan Google dan mulai bagi tagihan dalam hitungan detik
+            </p>
+            <Button 
+              size="lg"
+              onClick={() => navigate("/auth")}
+              className="bg-gradient-primary text-white shadow-glow"
+            >
+              Masuk dengan Google
+            </Button>
+          </CardContent>
+        </Card>
+      </section>
     </div>
   );
 };
