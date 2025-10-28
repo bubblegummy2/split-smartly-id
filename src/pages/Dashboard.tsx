@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import SplitBillForm from "@/components/SplitBillForm";
 import TransactionHistory from "@/components/TransactionHistory";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LogOut, Receipt, History } from "lucide-react";
+import { LogOut, Receipt, History, UserCircle } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 
 export default function Dashboard() {
@@ -73,10 +73,16 @@ export default function Dashboard() {
               Selamat datang, {user.user_metadata?.full_name || user.email}
             </p>
           </div>
-          <Button variant="outline" onClick={handleSignOut}>
-            <LogOut className="mr-2 h-4 w-4" />
-            Logout
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate("/profile")}>
+              <UserCircle className="mr-2 h-4 w-4" />
+              Profil
+            </Button>
+            <Button variant="outline" onClick={handleSignOut}>
+              <LogOut className="mr-2 h-4 w-4" />
+              Logout
+            </Button>
+          </div>
         </div>
       </header>
 
