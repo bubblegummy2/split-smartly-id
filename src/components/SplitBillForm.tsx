@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { formatRupiah, parseRupiah } from "@/lib/currency";
-import { Plus, Trash2, Calculator, Users, Camera } from "lucide-react";
+import { Plus, Trash2, Calculator, Users, Camera, ArrowRight, ArrowLeft } from "lucide-react";
 import ReceiptScanner from "./ReceiptScanner";
 
 interface Item {
@@ -38,6 +38,7 @@ const CATEGORIES = [
 ];
 
 export default function SplitBillForm({ userId }: { userId: string }) {
+  const [step, setStep] = useState(1); // Step 1 or 2
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [items, setItems] = useState<Item[]>([]);
@@ -300,8 +301,40 @@ export default function SplitBillForm({ userId }: { userId: string }) {
     toast.success(`${newItems.length} item ditambahkan dari scan`);
   };
 
+  const handleNextStep = () => {
+    if (!title.trim()) {
+      toast.error("Judul tidak boleh kosong!");
+      return;
+    }
+    if (items.length === 0) {
+      toast.error("Tambahkan minimal 1 item!");
+      return;
+    }
+    setStep(2);
+  };
+
   return (
-    <div className="grid gap-6 lg:grid-cols-2">
+    <div className="space-y-6">
+      {/* Step Indicator */}
+      <div className="flex items-center justify-center gap-4 mb-6">
+        <div className={`flex items-center gap-2 ${step === 1 ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step === 1 ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground'}`}>
+            1
+          </div>
+          <span>Informasi & Item</span>
+        </div>
+        <div className="w-12 h-0.5 bg-border" />
+        <div className={`flex items-center gap-2 ${step === 2 ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step === 2 ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground'}`}>
+            2
+          </div>
+          <span>Biaya & Peserta</span>
+        </div>
+      </div>
+
+      {/* Step 1: Transaction Info & Items */}
+      {step === 1 && (
+        <div className="grid gap-6 lg:grid-cols-2">
       {/* Left Column - Form */}
       <div className="space-y-6">
         {/* Transaction Info */}
@@ -434,196 +467,224 @@ export default function SplitBillForm({ userId }: { userId: string }) {
             )}
           </CardContent>
         </Card>
-
-        {/* Additional Costs */}
-        <Card className="shadow-medium">
-          <CardHeader>
-            <CardTitle>Biaya Tambahan</CardTitle>
-            <CardDescription>Akan dibagi rata ke semua peserta</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <Label>Pajak (Rp)</Label>
-                <Input
-                  placeholder="0"
-                  value={tax}
-                  onChange={(e) => setTax(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label>Service (Rp)</Label>
-                <Input
-                  placeholder="0"
-                  value={service}
-                  onChange={(e) => setService(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label>Tip (Rp)</Label>
-                <Input
-                  placeholder="0"
-                  value={tip}
-                  onChange={(e) => setTip(e.target.value)}
-                />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        
+        {/* Next Button */}
+        <div className="flex justify-end">
+          <Button onClick={handleNextStep} size="lg" className="gap-2">
+            Lanjut ke Step 2
+            <ArrowRight className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
+        </div>
+      )}
 
-      {/* Right Column - Participants & Summary */}
-      <div className="space-y-6">
-        {/* Participants */}
-        <Card className="shadow-medium">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Peserta
-            </CardTitle>
-            <CardDescription>Tambah 2-10 orang yang ikut patungan</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex gap-2">
-              <Input
-                placeholder="Nama peserta"
-                value={newParticipantName}
-                onChange={(e) => setNewParticipantName(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && addParticipant()}
-              />
-              <Button onClick={addParticipant}>
-                <Plus className="h-4 w-4" />
-              </Button>
-            </div>
-
-            {participants.length > 0 && (
-              <div className="space-y-2">
-                {participants.map((participant) => (
-                  <div
-                    key={participant.id}
-                    className="flex items-center justify-between p-3 rounded-lg border bg-card"
-                  >
-                    <span className="font-medium">{participant.name}</span>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => removeParticipant(participant.id)}
-                    >
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                    </Button>
+      {/* Step 2: Additional Costs, Participants & Summary */}
+      {step === 2 && (
+        <div className="grid gap-6 lg:grid-cols-2">
+          {/* Left Column - Additional Costs & Participants */}
+          <div className="space-y-6">
+            {/* Additional Costs */}
+            <Card className="shadow-medium">
+              <CardHeader>
+                <CardTitle>Biaya Tambahan</CardTitle>
+                <CardDescription>Akan dibagi rata ke semua peserta</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label>Pajak (Rp)</Label>
+                    <Input
+                      placeholder="0"
+                      value={tax}
+                      onChange={(e) => setTax(e.target.value)}
+                    />
                   </div>
-                ))}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Item Assignment */}
-        {items.length > 0 && participants.length > 0 && (
-          <Card className="shadow-medium">
-            <CardHeader>
-              <CardTitle>Assign Item ke Peserta</CardTitle>
-              <CardDescription>Centang item yang dipesan masing-masing orang</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {items.map((item) => (
-                <div key={item.id} className="space-y-2">
-                  <div className="font-medium text-sm">
-                    {item.name} ({formatRupiah(item.price * item.quantity)})
+                  <div>
+                    <Label>Service (Rp)</Label>
+                    <Input
+                      placeholder="0"
+                      value={service}
+                      onChange={(e) => setService(e.target.value)}
+                    />
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label>Tip (Rp)</Label>
+                    <Input
+                      placeholder="0"
+                      value={tip}
+                      onChange={(e) => setTip(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            {/* Participants */}
+            <Card className="shadow-medium">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Peserta
+                </CardTitle>
+                <CardDescription>Tambah 2-10 orang yang ikut patungan</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Nama peserta"
+                    value={newParticipantName}
+                    onChange={(e) => setNewParticipantName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && addParticipant()}
+                  />
+                  <Button onClick={addParticipant}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {participants.length > 0 && (
+                  <div className="space-y-2">
                     {participants.map((participant) => (
-                      <div key={participant.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={`${item.id}-${participant.id}`}
-                          checked={item.assignedTo.includes(participant.id)}
-                          onCheckedChange={() => toggleAssignment(item.id, participant.id)}
-                        />
-                        <Label
-                          htmlFor={`${item.id}-${participant.id}`}
-                          className="text-sm cursor-pointer"
+                      <div
+                        key={participant.id}
+                        className="flex items-center justify-between p-3 rounded-lg border bg-card"
+                      >
+                        <span className="font-medium">{participant.name}</span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => removeParticipant(participant.id)}
                         >
-                          {participant.name}
-                        </Label>
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
                       </div>
                     ))}
                   </div>
-                  <Separator className="mt-2" />
-                </div>
-              ))}
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Summary */}
-        {participants.length > 0 && (
-          <Card className="shadow-large border-primary/20">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Calculator className="h-5 w-5" />
-                Ringkasan Pembagian
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Subtotal Item:</span>
-                  <span className="font-medium">{formatRupiah(calculation.subtotal)}</span>
-                </div>
-                {calculation.tax > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Pajak:</span>
-                    <span>{formatRupiah(calculation.tax)}</span>
-                  </div>
                 )}
-                {calculation.service > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Service:</span>
-                    <span>{formatRupiah(calculation.service)}</span>
-                  </div>
-                )}
-                {calculation.tip > 0 && (
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Tip:</span>
-                    <span>{formatRupiah(calculation.tip)}</span>
-                  </div>
-                )}
-                <Separator />
-                <div className="flex justify-between font-bold text-lg">
-                  <span>Total:</span>
-                  <span className="text-primary">{formatRupiah(calculation.total)}</span>
-                </div>
-              </div>
+              </CardContent>
+            </Card>
+          </div>
 
-              <Separator />
+          {/* Right Column - Item Assignment & Summary */}
+          <div className="space-y-6">
+            {/* Item Assignment */}
+            {items.length > 0 && participants.length > 0 && (
+              <Card className="shadow-medium">
+                <CardHeader>
+                  <CardTitle>Assign Item ke Peserta</CardTitle>
+                  <CardDescription>Centang item yang dipesan masing-masing orang</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {items.map((item) => (
+                    <div key={item.id} className="space-y-2">
+                      <div className="font-medium text-sm">
+                        {item.name} ({formatRupiah(item.price * item.quantity)})
+                      </div>
+                      <div className="grid grid-cols-2 gap-2">
+                        {participants.map((participant) => (
+                          <div key={participant.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`${item.id}-${participant.id}`}
+                              checked={item.assignedTo.includes(participant.id)}
+                              onCheckedChange={() => toggleAssignment(item.id, participant.id)}
+                            />
+                            <Label
+                              htmlFor={`${item.id}-${participant.id}`}
+                              className="text-sm cursor-pointer"
+                            >
+                              {participant.name}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                      <Separator className="mt-2" />
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
 
-              <div className="space-y-2">
-                <div className="font-semibold text-sm mb-3">Pembagian per Orang:</div>
-                {participants.map((participant) => (
-                  <div
-                    key={participant.id}
-                    className="flex justify-between p-3 rounded-lg bg-accent/10"
-                  >
-                    <span className="font-medium">{participant.name}</span>
-                    <span className="font-bold text-primary">
-                      {formatRupiah(calculation.participantTotals[participant.id] || 0)}
-                    </span>
+            {/* Summary */}
+            {participants.length > 0 && (
+              <Card className="shadow-large border-primary/20">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Calculator className="h-5 w-5" />
+                    Ringkasan Pembagian
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Subtotal Item:</span>
+                      <span className="font-medium">{formatRupiah(calculation.subtotal)}</span>
+                    </div>
+                    {calculation.tax > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Pajak:</span>
+                        <span>{formatRupiah(calculation.tax)}</span>
+                      </div>
+                    )}
+                    {calculation.service > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Service:</span>
+                        <span>{formatRupiah(calculation.service)}</span>
+                      </div>
+                    )}
+                    {calculation.tip > 0 && (
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Tip:</span>
+                        <span>{formatRupiah(calculation.tip)}</span>
+                      </div>
+                    )}
+                    <Separator />
+                    <div className="flex justify-between font-bold text-lg">
+                      <span>Total:</span>
+                      <span className="text-primary">{formatRupiah(calculation.total)}</span>
+                    </div>
                   </div>
-                ))}
-              </div>
 
-              <Button
-                onClick={handleSave}
-                disabled={loading || items.length === 0 || participants.length < 2}
-                className="w-full"
-                size="lg"
-              >
-                {loading ? "Menyimpan..." : "Simpan Transaksi"}
-              </Button>
-            </CardContent>
-          </Card>
-        )}
-      </div>
+                  <Separator />
+
+                  <div className="space-y-2">
+                    <div className="font-semibold text-sm mb-3">Pembagian per Orang:</div>
+                    {participants.map((participant) => (
+                      <div
+                        key={participant.id}
+                        className="flex justify-between p-3 rounded-lg bg-accent/10"
+                      >
+                        <span className="font-medium">{participant.name}</span>
+                        <span className="font-bold text-primary">
+                          {formatRupiah(calculation.participantTotals[participant.id] || 0)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={() => setStep(1)}
+                      className="flex-1"
+                      size="lg"
+                    >
+                      <ArrowLeft className="mr-2 h-5 w-5" />
+                      Kembali
+                    </Button>
+                    <Button
+                      onClick={handleSave}
+                      disabled={loading || items.length === 0 || participants.length < 2}
+                      className="flex-1"
+                      size="lg"
+                    >
+                      {loading ? "Menyimpan..." : "Simpan Transaksi"}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      )}
 
       {showScanner && (
         <ReceiptScanner
