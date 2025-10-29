@@ -40,16 +40,10 @@ export default function Dashboard() {
   const handleSignOut = async () => {
     try {
       const { error } = await supabase.auth.signOut();
-      // Ignore session_not_found errors - session already invalid
-      if (error && error.message !== "Session not found") {
-        throw error;
-      }
+      if (error) throw error;
       toast.success("Berhasil logout");
-      navigate("/auth");
     } catch (error: any) {
       toast.error(error.message || "Gagal logout");
-      // Still redirect to auth page even if logout fails
-      navigate("/auth");
     }
   };
 
