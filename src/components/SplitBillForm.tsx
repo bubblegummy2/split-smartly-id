@@ -316,19 +316,19 @@ export default function SplitBillForm({ userId }: { userId: string }) {
   return (
     <div className="space-y-6">
       {/* Step Indicator */}
-      <div className="flex items-center justify-center gap-4 mb-6">
-        <div className={`flex items-center gap-2 ${step === 1 ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step === 1 ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground'}`}>
+      <div className="flex items-center justify-center gap-2 sm:gap-4 mb-4 sm:mb-6">
+        <div className={`flex items-center gap-1 sm:gap-2 ${step === 1 ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>
+          <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border-2 text-xs sm:text-base ${step === 1 ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground'}`}>
             1
           </div>
-          <span>Informasi & Item</span>
+          <span className="text-xs sm:text-sm lg:text-base">Informasi & Item</span>
         </div>
-        <div className="w-12 h-0.5 bg-border" />
-        <div className={`flex items-center gap-2 ${step === 2 ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 ${step === 2 ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground'}`}>
+        <div className="w-8 sm:w-12 h-0.5 bg-border" />
+        <div className={`flex items-center gap-1 sm:gap-2 ${step === 2 ? 'text-primary font-semibold' : 'text-muted-foreground'}`}>
+          <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center border-2 text-xs sm:text-base ${step === 2 ? 'border-primary bg-primary text-primary-foreground' : 'border-muted-foreground'}`}>
             2
           </div>
-          <span>Biaya & Peserta</span>
+          <span className="text-xs sm:text-sm lg:text-base">Biaya & Peserta</span>
         </div>
       </div>
 

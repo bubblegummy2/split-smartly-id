@@ -124,9 +124,9 @@ export default function TransactionHistory({ userId }: { userId: string }) {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold">Riwayat Transaksi</h2>
-        <Badge variant="secondary">{transactions.length} transaksi</Badge>
+      <div className="flex items-center justify-between flex-wrap gap-2">
+        <h2 className="text-xl sm:text-2xl font-bold">Riwayat Transaksi</h2>
+        <Badge variant="secondary" className="text-xs sm:text-sm">{transactions.length} transaksi</Badge>
       </div>
 
       <div className="space-y-4">
@@ -136,30 +136,30 @@ export default function TransactionHistory({ userId }: { userId: string }) {
 
           return (
             <Card key={transaction.id} className="shadow-medium">
-              <CardHeader className="pb-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <CardTitle className="text-lg">{transaction.title}</CardTitle>
+              <CardHeader className="pb-3 px-4 sm:px-6 pt-4 sm:pt-6">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <CardTitle className="text-base sm:text-lg truncate">{transaction.title}</CardTitle>
                     {transaction.description && (
-                      <CardDescription className="mt-1">
+                      <CardDescription className="mt-1 text-xs sm:text-sm line-clamp-2">
                         {transaction.description}
                       </CardDescription>
                     )}
                   </div>
-                  <div className="text-right">
-                    <div className="text-2xl font-bold text-primary">
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-lg sm:text-2xl font-bold text-primary whitespace-nowrap">
                       {formatRupiah(transaction.total_amount)}
                     </div>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent>
-                <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+              <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
+                <div className="flex items-center gap-2 sm:gap-4 text-xs sm:text-sm text-muted-foreground mb-3">
                   <div className="flex items-center gap-1">
-                    <Calendar className="h-4 w-4" />
-                    {format(new Date(transaction.transaction_date), "dd MMM yyyy", {
+                    <Calendar className="h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="truncate">{format(new Date(transaction.transaction_date), "dd MMM yyyy", {
                       locale: id,
-                    })}
+                    })}</span>
                   </div>
                 </div>
 

@@ -17,17 +17,17 @@ const Index = () => {
           alt="Split bills with friends" 
           className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="relative container mx-auto px-4 py-24 text-center text-white">
-          <h1 className="text-5xl md:text-6xl font-bold mb-6">
+        <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 lg:py-24 text-center text-white">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6">
             Split Bill
           </h1>
-          <p className="text-xl md:text-2xl mb-8 opacity-90 max-w-2xl mx-auto">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 opacity-90 max-w-2xl mx-auto px-4">
             Bagi tagihan dengan mudah dan adil menggunakan AI
           </p>
           <Button 
             size="lg" 
             onClick={() => navigate("/auth")}
-            className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-glow text-lg px-8 py-6"
+            className="bg-accent hover:bg-accent/90 text-accent-foreground shadow-glow text-sm sm:text-base lg:text-lg px-6 sm:px-8 py-4 sm:py-6"
           >
             Mulai Sekarang
           </Button>
@@ -35,9 +35,9 @@ const Index = () => {
       </section>
 
       {/* Features */}
-      <section className="container mx-auto px-4 py-20">
-        <h2 className="text-3xl font-bold text-center mb-12">Fitur Unggulan</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-8 sm:mb-12">Fitur Unggulan</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <Card className="shadow-medium hover:shadow-large transition-shadow">
             <CardContent className="pt-6 text-center">
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -89,17 +89,17 @@ const Index = () => {
       </section>
 
       {/* CTA */}
-      <section className="container mx-auto px-4 py-20 text-center">
+      <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 text-center">
         <Card className="max-w-2xl mx-auto shadow-large border-primary/20">
-          <CardContent className="pt-12 pb-12">
-            <h2 className="text-3xl font-bold mb-4">Siap Mulai Membagi Tagihan?</h2>
-            <p className="text-muted-foreground mb-8">
+          <CardContent className="pt-8 sm:pt-10 lg:pt-12 pb-8 sm:pb-10 lg:pb-12 px-4 sm:px-6">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">Siap Mulai Membagi Tagihan?</h2>
+            <p className="text-sm sm:text-base text-muted-foreground mb-6 sm:mb-8">
               Login dengan Google dan mulai bagi tagihan dalam hitungan detik
             </p>
             <Button 
               size="lg"
               onClick={() => navigate("/auth")}
-              className="bg-gradient-primary text-white shadow-glow"
+              className="bg-gradient-primary text-white shadow-glow text-sm sm:text-base"
             >
               Masuk dengan Google
             </Button>

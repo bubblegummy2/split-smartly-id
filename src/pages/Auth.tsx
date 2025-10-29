@@ -133,7 +133,7 @@ export default function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex flex-col lg:flex-row">
       {/* Left side - Hero image */}
       <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-primary opacity-90" />
@@ -151,15 +151,15 @@ export default function Auth() {
       </div>
 
       {/* Right side - Auth forms */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-gradient-subtle">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 bg-gradient-subtle">
         <Card className="w-full max-w-md shadow-large">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl text-center">Split Bill</CardTitle>
-            <CardDescription className="text-center">
+          <CardHeader className="space-y-1 px-4 sm:px-6 pt-4 sm:pt-6">
+            <CardTitle className="text-xl sm:text-2xl text-center">Split Bill</CardTitle>
+            <CardDescription className="text-center text-xs sm:text-sm">
               Masuk atau buat akun untuk mulai membagi tagihan
             </CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
             <Tabs defaultValue="signin" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-4">
                 <TabsTrigger value="signin">Masuk</TabsTrigger>
