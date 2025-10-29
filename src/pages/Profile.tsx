@@ -155,48 +155,51 @@ export default function Profile() {
     <div className="min-h-screen bg-gradient-subtle">
       {/* Header */}
       <header className="border-b bg-card shadow-soft">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
           <Button
             variant="ghost"
             onClick={() => navigate("/dashboard")}
-            className="gap-2"
+            className="gap-1 sm:gap-2"
+            size="sm"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Kembali ke Dashboard
+            <ArrowLeft className="h-3 w-3 sm:h-4 sm:w-4" />
+            <span className="text-xs sm:text-sm">Kembali ke Dashboard</span>
           </Button>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8 max-w-2xl">
-        <div className="space-y-6">
+      <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 max-w-2xl">
+        <div className="space-y-4 sm:space-y-6">
           {/* Profile Info */}
           <Card className="shadow-medium">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+            <CardHeader className="px-4 sm:px-6 py-4 sm:py-5">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <User className="h-4 w-4 sm:h-5 sm:w-5" />
                 Informasi Profil
               </CardTitle>
-              <CardDescription>Perbarui nama panggilan Anda</CardDescription>
+              <CardDescription className="text-xs sm:text-sm">
+                Perbarui nama panggilan Anda
+              </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
               <form onSubmit={handleUpdateProfile} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
+                  <Label htmlFor="email" className="text-xs sm:text-sm">Email</Label>
                   <Input
                     id="email"
                     type="email"
                     value={user.email || ""}
                     disabled
-                    className="bg-muted"
+                    className="bg-muted text-xs sm:text-sm"
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
                     Email tidak dapat diubah
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="fullName">Nama Panggilan *</Label>
+                  <Label htmlFor="fullName" className="text-xs sm:text-sm">Nama Panggilan *</Label>
                   <Input
                     id="fullName"
                     type="text"
@@ -205,8 +208,9 @@ export default function Profile() {
                     onChange={(e) => setFullName(e.target.value)}
                     maxLength={100}
                     required
+                    className="text-xs sm:text-sm"
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
                     Maksimal 100 karakter
                   </p>
                 </div>
@@ -214,7 +218,8 @@ export default function Profile() {
                 <Button
                   type="submit"
                   disabled={savingProfile}
-                  className="w-full"
+                  className="w-full text-xs sm:text-sm"
+                  size="sm"
                 >
                   {savingProfile ? "Menyimpan..." : "Simpan Perubahan"}
                 </Button>
@@ -226,19 +231,19 @@ export default function Profile() {
 
           {/* Change Password */}
           <Card className="shadow-medium">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <Lock className="h-5 w-5" />
+            <CardHeader className="px-4 sm:px-6 py-4 sm:py-5">
+              <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
+                <Lock className="h-4 w-4 sm:h-5 sm:w-5" />
                 Ubah Password
               </CardTitle>
-              <CardDescription>
+              <CardDescription className="text-xs sm:text-sm">
                 Perbarui password untuk keamanan akun Anda
               </CardDescription>
             </CardHeader>
-            <CardContent>
+            <CardContent className="px-4 sm:px-6 pb-4 sm:pb-6">
               <form onSubmit={handleUpdatePassword} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="currentPassword">Password Lama *</Label>
+                  <Label htmlFor="currentPassword" className="text-xs sm:text-sm">Password Lama *</Label>
                   <Input
                     id="currentPassword"
                     type="password"
@@ -246,11 +251,12 @@ export default function Profile() {
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
                     required
+                    className="text-xs sm:text-sm"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="newPassword">Password Baru *</Label>
+                  <Label htmlFor="newPassword" className="text-xs sm:text-sm">Password Baru *</Label>
                   <Input
                     id="newPassword"
                     type="password"
@@ -259,14 +265,15 @@ export default function Profile() {
                     onChange={(e) => setNewPassword(e.target.value)}
                     minLength={6}
                     required
+                    className="text-xs sm:text-sm"
                   />
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-[10px] sm:text-xs text-muted-foreground">
                     Minimal 6 karakter
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPassword">Konfirmasi Password Baru *</Label>
+                  <Label htmlFor="confirmPassword" className="text-xs sm:text-sm">Konfirmasi Password Baru *</Label>
                   <Input
                     id="confirmPassword"
                     type="password"
@@ -275,13 +282,15 @@ export default function Profile() {
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     minLength={6}
                     required
+                    className="text-xs sm:text-sm"
                   />
                 </div>
 
                 <Button
                   type="submit"
                   disabled={savingPassword}
-                  className="w-full"
+                  className="w-full text-xs sm:text-sm"
+                  size="sm"
                 >
                   {savingPassword ? "Memperbarui..." : "Ubah Password"}
                 </Button>
