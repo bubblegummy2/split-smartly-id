@@ -9,6 +9,23 @@ import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
 import { ArrowLeft, User, Lock } from "lucide-react";
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import { z } from "zod";
+
+const profileSchema = z.object({
+  fullName: z.string().trim().min(1, { message: "Nama tidak boleh kosong" }).max(100),
+});
+
+const passwordSchema = z.object({
+  currentPassword: z.string().min(1, { message: "Password lama harus diisi" }),
+  newPassword: z.string().min(6, { message: "Password baru minimal 6 karakter" }).max(100),
+  confirmPassword: z.string().min(1, { message: "Konfirmasi password harus diisi" }),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "Password baru tidak cocok",
+  path: ["confirmPassword"],
+}).refine((data) => data.currentPassword !== data.newPassword, {
+  message: "Password baru harus berbeda dengan password lama",
+  path: ["newPassword"],
+});
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -46,13 +63,12 @@ export default function Profile() {
   const handleUpdateProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!fullName.trim()) {
-      toast.error("Nama tidak boleh kosong!");
-      return;
-    }
-
-    if (fullName.trim().length > 100) {
-      toast.error("Nama maksimal 100 karakter!");
+    try {
+      profileSchema.parse({ fullName });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      }
       return;
     }
 
@@ -75,8 +91,7 @@ export default function Profile() {
 
       toast.success("Profil berhasil diperbarui!");
     } catch (error: any) {
-      console.error("Error updating profile:", error);
-      toast.error(error.message || "Gagal memperbarui profil");
+      toast.error("Gagal memperbarui profil");
     } finally {
       setSavingProfile(false);
     }
@@ -85,23 +100,12 @@ export default function Profile() {
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!currentPassword || !newPassword || !confirmPassword) {
-      toast.error("Semua field password harus diisi!");
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      toast.error("Password baru minimal 6 karakter!");
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      toast.error("Password baru tidak cocok!");
-      return;
-    }
-
-    if (currentPassword === newPassword) {
-      toast.error("Password baru harus berbeda dengan password lama!");
+    try {
+      passwordSchema.parse({ currentPassword, newPassword, confirmPassword });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      }
       return;
     }
 
@@ -131,8 +135,7 @@ export default function Profile() {
       setNewPassword("");
       setConfirmPassword("");
     } catch (error: any) {
-      console.error("Error updating password:", error);
-      toast.error(error.message || "Gagal memperbarui password");
+      toast.error("Gagal memperbarui password");
     } finally {
       setSavingPassword(false);
     }

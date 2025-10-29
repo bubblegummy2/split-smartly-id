@@ -8,6 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import heroImage from "@/assets/hero-split-bill.jpg";
+import { z } from "zod";
+
+const authSchema = z.object({
+  email: z.string().trim().email({ message: "Email tidak valid" }).max(255),
+  password: z.string().min(6, { message: "Password minimal 6 karakter" }).max(100),
+  fullName: z.string().trim().min(1, { message: "Nama tidak boleh kosong" }).max(100).optional(),
+});
 
 export default function Auth() {
   const navigate = useNavigate();
@@ -35,28 +42,19 @@ export default function Auth() {
   }, [navigate]);
 
   const validateForm = (isSignup: boolean) => {
-    if (!email.trim()) {
-      alert("Email tidak boleh kosong!");
+    try {
+      authSchema.parse({
+        email,
+        password,
+        fullName: isSignup ? fullName : undefined,
+      });
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      }
       return false;
     }
-    if (!password.trim()) {
-      alert("Password tidak boleh kosong!");
-      return false;
-    }
-    if (isSignup && !fullName.trim()) {
-      alert("Nama lengkap tidak boleh kosong!");
-      return false;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      alert("Format email tidak valid!");
-      return false;
-    }
-    if (password.length < 6) {
-      alert("Password harus minimal 6 karakter!");
-      return false;
-    }
-    return true;
   };
 
   const handleSignUp = async (e: React.FormEvent) => {

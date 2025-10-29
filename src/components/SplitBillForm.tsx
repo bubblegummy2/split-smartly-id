@@ -13,6 +13,23 @@ import { toast } from "sonner";
 import { formatRupiah, parseRupiah } from "@/lib/currency";
 import { Plus, Trash2, Calculator, Users, Camera, ArrowRight, ArrowLeft } from "lucide-react";
 import ReceiptScanner from "./ReceiptScanner";
+import { z } from "zod";
+
+const itemSchema = z.object({
+  name: z.string().trim().min(1, { message: "Nama item tidak boleh kosong" }).max(100),
+  price: z.number().positive({ message: "Harga harus lebih dari 0" }).max(999999999),
+  quantity: z.number().int().positive().min(1).max(9999),
+  category: z.string().max(50),
+});
+
+const participantSchema = z.object({
+  name: z.string().trim().min(1, { message: "Nama peserta tidak boleh kosong" }).max(100),
+});
+
+const transactionSchema = z.object({
+  title: z.string().trim().min(1, { message: "Judul tidak boleh kosong" }).max(200),
+  description: z.string().trim().max(1000).optional(),
+});
 
 interface Item {
   id: string;
@@ -59,20 +76,28 @@ export default function SplitBillForm({ userId }: { userId: string }) {
   const [newParticipantName, setNewParticipantName] = useState("");
 
   const addItem = () => {
-    if (!newItemName.trim()) {
-      alert("Nama item tidak boleh kosong!");
-      return;
-    }
-    if (!newItemPrice.trim() || parseRupiah(newItemPrice) <= 0) {
-      alert("Harga harus lebih dari 0!");
+    const price = parseRupiah(newItemPrice);
+    const quantity = parseInt(newItemQuantity) || 1;
+
+    try {
+      itemSchema.parse({
+        name: newItemName,
+        price,
+        quantity,
+        category: newItemCategory,
+      });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      }
       return;
     }
 
     const newItem: Item = {
       id: Date.now().toString(),
-      name: newItemName,
-      price: parseRupiah(newItemPrice),
-      quantity: parseInt(newItemQuantity) || 1,
+      name: newItemName.trim(),
+      price,
+      quantity,
       category: newItemCategory,
       assignedTo: [],
     };
@@ -90,22 +115,27 @@ export default function SplitBillForm({ userId }: { userId: string }) {
   };
 
   const addParticipant = () => {
-    if (!newParticipantName.trim()) {
-      alert("Nama peserta tidak boleh kosong!");
+    try {
+      participantSchema.parse({ name: newParticipantName });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      }
       return;
     }
+
     if (participants.length >= 10) {
-      alert("Maksimal 10 peserta!");
+      toast.error("Maksimal 10 peserta!");
       return;
     }
-    if (participants.some((p) => p.name.toLowerCase() === newParticipantName.toLowerCase())) {
-      alert("Nama peserta sudah ada!");
+    if (participants.some((p) => p.name.toLowerCase() === newParticipantName.trim().toLowerCase())) {
+      toast.error("Nama peserta sudah ada!");
       return;
     }
 
     const newParticipant: Participant = {
       id: Date.now().toString(),
-      name: newParticipantName,
+      name: newParticipantName.trim(),
     };
 
     setParticipants([...participants, newParticipant]);
@@ -172,23 +202,28 @@ export default function SplitBillForm({ userId }: { userId: string }) {
   };
 
   const handleSave = async () => {
-    if (!title.trim()) {
-      alert("Judul tidak boleh kosong!");
+    try {
+      transactionSchema.parse({ title, description });
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        toast.error(error.errors[0].message);
+      }
       return;
     }
+
     if (items.length === 0) {
-      alert("Tambahkan minimal 1 item!");
+      toast.error("Tambahkan minimal 1 item!");
       return;
     }
     if (participants.length < 2) {
-      alert("Tambahkan minimal 2 peserta!");
+      toast.error("Tambahkan minimal 2 peserta!");
       return;
     }
 
     // Check if all items are assigned
     const unassignedItems = items.filter((item) => item.assignedTo.length === 0);
     if (unassignedItems.length > 0) {
-      alert(`Item berikut belum diassign: ${unassignedItems.map((i) => i.name).join(", ")}`);
+      toast.error(`Item berikut belum diassign: ${unassignedItems.map((i) => i.name).join(", ")}`);
       return;
     }
 
@@ -288,17 +323,37 @@ export default function SplitBillForm({ userId }: { userId: string }) {
   const calculation = calculateSplit();
 
   const handleScannedItems = (scannedItems: any[]) => {
-    const newItems: Item[] = scannedItems.map((item) => ({
-      id: Date.now().toString() + Math.random(),
-      name: item.name,
-      price: item.price,
-      quantity: item.quantity || 1,
-      category: "Makanan",
-      assignedTo: [],
-    }));
-    setItems([...items, ...newItems]);
+    const validatedItems: Item[] = scannedItems
+      .map((item) => {
+        try {
+          const validated = itemSchema.parse({
+            name: item.name,
+            price: item.price,
+            quantity: item.quantity || 1,
+            category: "Makanan",
+          });
+          return {
+            id: Date.now().toString() + Math.random(),
+            ...validated,
+            assignedTo: [],
+          };
+        } catch {
+          return null;
+        }
+      })
+      .filter((item): item is Item => item !== null);
+
+    if (validatedItems.length > 0) {
+      setItems([...items, ...validatedItems]);
+      if (validatedItems.length < scannedItems.length) {
+        toast.info(`${validatedItems.length} dari ${scannedItems.length} item berhasil ditambahkan`);
+      } else {
+        toast.success(`${validatedItems.length} item ditambahkan dari scan`);
+      }
+    } else {
+      toast.error("Tidak ada item valid yang dapat ditambahkan");
+    }
     setShowScanner(false);
-    toast.success(`${newItems.length} item ditambahkan dari scan`);
   };
 
   const handleNextStep = () => {

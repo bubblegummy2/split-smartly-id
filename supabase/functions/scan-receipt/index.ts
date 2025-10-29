@@ -11,7 +11,22 @@ serve(async (req) => {
   }
 
   try {
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: 'Unauthorized', items: [] }), {
+        status: 401,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
     const { image } = await req.json();
+    
+    if (!image || typeof image !== 'string') {
+      return new Response(JSON.stringify({ error: 'Invalid image data', items: [] }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
@@ -51,9 +66,37 @@ serve(async (req) => {
     const data = await response.json();
     const content = data.choices?.[0]?.message?.content || '[]';
     
-    let items = [];
+    interface ReceiptItem {
+      name: string;
+      price: number;
+      quantity: number;
+    }
+    
+    let items: ReceiptItem[] = [];
     try {
-      items = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
+      const parsed = JSON.parse(content.replace(/```json\n?|\n?```/g, '').trim());
+      
+      // Validate each item
+      items = Array.isArray(parsed) ? parsed
+        .filter(item => 
+          item &&
+          typeof item === 'object' &&
+          typeof item.name === 'string' &&
+          item.name.trim().length > 0 &&
+          item.name.length <= 100 &&
+          typeof item.price === 'number' &&
+          item.price > 0 &&
+          item.price <= 999999999 &&
+          typeof item.quantity === 'number' &&
+          Number.isInteger(item.quantity) &&
+          item.quantity > 0 &&
+          item.quantity <= 9999
+        )
+        .map(item => ({
+          name: item.name.trim().slice(0, 100),
+          price: item.price,
+          quantity: item.quantity
+        })) : [];
     } catch {
       items = [];
     }

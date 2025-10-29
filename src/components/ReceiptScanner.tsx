@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Upload, X, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ReceiptScannerProps {
   onClose: () => void;
@@ -17,6 +18,19 @@ export default function ReceiptScanner({ onClose, onScanComplete }: ReceiptScann
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
+
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Ukuran file maksimal 5MB");
+      return;
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("Format file tidak didukung. Gunakan JPG atau PNG");
+      return;
+    }
 
     // Preview
     const reader = new FileReader();
@@ -34,6 +48,12 @@ export default function ReceiptScanner({ onClose, onScanComplete }: ReceiptScann
         reader.readAsDataURL(file);
       });
 
+      // Get auth session
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("Silakan login terlebih dahulu");
+      }
+
       // Call edge function for AI OCR
       const response = await fetch(
         `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/scan-receipt`,
@@ -41,7 +61,7 @@ export default function ReceiptScanner({ onClose, onScanComplete }: ReceiptScann
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({ image: base64 }),
         }
@@ -60,9 +80,7 @@ export default function ReceiptScanner({ onClose, onScanComplete }: ReceiptScann
         toast.error("Tidak ada item yang terdeteksi");
       }
     } catch (error: any) {
-      console.error("Scan error:", error);
       toast.error(error.message || "Gagal scan struk");
-      alert(error.message || "Gagal scan struk");
     } finally {
       setLoading(false);
     }
